@@ -730,7 +730,9 @@ function initLanguage(){
  const topbar=$('localeHome'),picker=$('localePicker');
  if(!localesComplete||!topbar||!picker)return;
  const preferred=storageGet(languageStorage);
- activeLanguage=resolveLanguageTag(preferred)??[...(navigator.languages??[]),navigator.language].map(resolveLanguageTag).find(Boolean)??'ja';
+ const browserPreferences=[...(navigator.languages??[]),navigator.language]
+  .filter(value=>typeof value==='string'&&value.trim());
+ activeLanguage=resolveLanguageTag(preferred)??browserPreferences.map(resolveLanguageTag).find(Boolean)??(browserPreferences.length?'en':'ja');
  const tasks=[];
  const visit=node=>{
   if(node.nodeType===3){
