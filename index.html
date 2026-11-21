@@ -531,6 +531,8 @@ input,textarea{-webkit-user-select:text;user-select:text;-webkit-touch-callout:d
         <div class="info-box"><div class="info-k">登録名</div><div id="homeName" class="info-v">未登録</div></div>
         <div class="info-box"><div class="info-k">ベスト</div><div id="homeBest" class="info-v">—</div></div>
       </div>
+      <button id="editNameBtn" class="btn ghost" type="button">名前を設定・変更（任意）</button>
+      <p class="note">名前を入力すると、名前と記録がランキングに公開されます。空欄でも遊べます。</p>
       <div id="homeStatus" class="status-line"></div>
       <div class="btn-row">
         <button id="startBtn" class="btn">ゲーム開始</button>
@@ -560,12 +562,12 @@ input,textarea{-webkit-user-select:text;user-select:text;-webkit-touch-callout:d
 <!-- NAME -->
 <section id="nameScreen" class="screen screen-scroll hidden">
   <div class="safe stack center home-hero">
-    <h2 class="title" style="font-size:36px">名前登録</h2>
+    <h2 class="title" style="font-size:36px">名前設定（任意）</h2>
     <div class="card-panel stack" style="width:100%">
-      <p class="subtitle">監督があなたの名前を確認している。<br>呼ばれたい名前を入力してください。</p>
-      <input id="nameInput" class="name-input" type="text" maxlength="20" autocomplete="off" placeholder="名前を入力" />
+      <p class="subtitle">名前と記録をランキングに載せるときだけ入力してください。空欄にして保存すると、名前なしで遊べます。</p>
+      <input id="nameInput" class="name-input" type="text" maxlength="20" autocomplete="nickname" aria-label="名前（任意）" placeholder="名前を入力" />
       <div id="nameError" class="status-line"></div>
-      <button id="saveNameBtn" class="btn">この名前で進む</button>
+      <button id="saveNameBtn" class="btn" type="button">保存してホームへ</button>
       <button id="nameBackBtn" class="btn ghost">ホームに戻る</button>
     </div>
   </div>
@@ -721,7 +723,7 @@ function showScreen(id){
 function storageGet(k){try{return localStorage.getItem(k)||'';}catch(e){return '';}}
 function storageSet(k,v){try{localStorage.setItem(k,String(v));}catch(e){}}
 function storageRemove(k){try{localStorage.removeItem(k);}catch(e){}}
-function sanitizeName(v){return String(v||'').replace(/[\u0000-\u001f\u007f]/g,'').trim().slice(0,20);}
+function sanitizeName(v){const capped=String(v||'').replace(/[\u0000-\u001f\u007f]/g,'').trim().slice(0,20);return Array.from(capped).filter(unit=>!/[\uD800-\uDFFF]/u.test(unit)).join('');}
 function formatScore(v){if(v===null||v===undefined||v==='')return '—';return Number(v).toLocaleString()+'点';}
 
 const TYPES=['ストレート','スライダー','カーブ','フォーク','チェンジアップ'];
@@ -750,7 +752,7 @@ function checkConstraints(l){if(countWhere(l,b=>b.power===5)>3)return false;if(c
 function fixupLineup(l){const re=(b,t)=>Object.assign(b,genAbility(t));const demote=k=>{let c=l.filter(b=>b[k]===5);while(c.length>3)c.pop()[k]=4;};demote('power');demote('eye');demote('meet');let bo=l.filter(b=>b.type==='粗い大砲型');while(bo.length>2){const b=bo.pop();if(b.order!==4)re(b,'長打型');}if(countWhere(l,b=>b.type==='下位打線型')<1)re(l[8],'下位打線型');let g=0;while(countWhere(l,b=>b.power>=4)<2&&g++<9){const c=l.find(b=>b.power<4&&(b.type==='長打型'||b.type==='粗い大砲型'||b.order>=4))||l[3];c.power=Math.max(4,c.power);}g=0;while(countWhere(l,b=>b.meet>=4)<2&&g++<9){const c=l.find(b=>b.meet<4&&(b.type==='巧打型'||b.type==='俊足型'))||l[0];c.meet=Math.max(4,c.meet);}if(countWhere(l,b=>b.eye>=4)<1){const c=l.find(b=>b.type==='選球型')||l[1];c.eye=Math.max(4,c.eye);}if(!['長打型','粗い大砲型'].includes(l[3].type))re(l[3],'長打型');}
 function generateLineup(){let l=[];for(let t=0;t<300;t++){l=[];for(let i=0;i<9;i++)l.push(makeBatter(i));if(!['長打型','粗い大砲型'].includes(l[3].type))l[3]=makeBatter(3);if(checkConstraints(l))break;}fixupLineup(l);l.forEach(b=>b.trait=traitText(b));return l;}
 
-let lineup=[],state=null,pending=null,lastResult=null,nameReturn='lineup';
+let lineup=[],state=null,pending=null,lastResult=null;
 function freshState(){return{batterIndex:0,balls:0,strikes:0,outs:0,runs:0,bases:{first:false,second:false,third:false},pitchCount:0,hits:0,singles:0,doubles:0,homers:0,walks:0,strikeouts:0,doublePlays:0,balks:0,weakTypeOuts:0,weakCourseOuts:0,weakSpeedOuts:0,chaseStrikes:0,middleHits:0,goodTypeHits:0,goodCourseHits:0,loadedEver:false,mode:'idle',pendingAction:null,pendingResult:null};}
 const currentBatter=()=>lineup[state.batterIndex];
 const anyRunner=()=>state.bases.first||state.bases.second||state.bases.third;
@@ -982,12 +984,12 @@ function resolveNow(){const res=resolvePitch();finishResolve(res,pitchStr(pendin
 function onContinue(){if(state.mode!=='result')return;hideCall();undim();const act=state.pendingAction;if(act==='gameOver'){endGame(state.pendingResult);return;}if(act==='nextBatter'){state.batterIndex=(state.batterIndex+1)%9;state.balls=0;state.strikes=0;renderBatter();}renderStatus();startPitch();}
 function renderLineupModal(){dom.lineupList.innerHTML=lineup.map(b=>`<div class="lu-row${state&&state.mode!=='over'&&b.order===currentBatter().order?' now':''}"><div class="lu-head"><span class="lu-num">${b.order}番</span><span class="lu-type">${b.hand}・${b.type}</span></div><div class="lu-line g">得意 ${b.goodType}・${b.goodCourse}・${b.goodSpeed}</div><div class="lu-line r">苦手 ${b.badType}・${b.badCourse}・${b.badSpeed}</div><div class="lu-trait">${b.trait}</div></div>`).join('');}
 function runCountdown(cb){state.mode='countdown';setButtons('none');showScreen('gameScreen');requestAnimationFrame(function(){sizeCanvas();sizeGameBg();requestAnimationFrame(sizeCanvas);});openOverlay(dom.countdownOverlay);dom.cdSub.textContent='「負けたらお前のせいな」';const steps=['3','2','1','登板'];let i=0;const step=()=>{dom.cdText.textContent=steps[i];dom.cdText.classList.remove('pop');void dom.cdText.offsetWidth;dom.cdText.classList.add('pop');i++;if(i<steps.length)setTimeout(step,700);else setTimeout(()=>{closeOverlay(dom.countdownOverlay);cb();},620);};setTimeout(step,REDUCED?150:550);}
-function startMatch(){state=freshState();renderBatter();renderStatus();renderRibbon(null);hideCall();undim();dom.playText.textContent='緑は苦手ゾーン。赤と真ん中は危険。';dom.stageLine.textContent='まもなく登板';sizeCanvas();startNico();runCountdown(startPitch);}
+function startMatch(){if(!lineup.length||$('lineupScreen').classList.contains('hidden'))return;state=freshState();state.displayName=sanitizeName(storageGet(LS_NAME));renderBatter();renderStatus();renderRibbon(null);hideCall();undim();dom.playText.textContent='緑は苦手ゾーン。赤と真ん中は危険。';dom.stageLine.textContent='まもなく登板';sizeCanvas();startNico();runCountdown(startPitch);}
 function prepareLineup(){lineup=generateLineup();$('lineupConfirmList').innerHTML=lineup.map(b=>`<div class="lineup-confirm-card"><div class="lc-head"><span class="lc-num">${b.order}番</span><span class="lc-type">${b.hand}・${b.type}</span></div><div class="lc-line lc-good">得意：${b.goodType}・${b.goodCourse}・${b.goodSpeed}</div><div class="lc-line lc-bad">苦手：${b.badType}・${b.badCourse}・${b.badSpeed}</div><div class="lc-trait">${b.trait}</div></div>`).join('');showScreen('lineupScreen');resetScreenScroll('lineupScreen');}
-function ensureNameThenLineup(){const n=storageGet(LS_NAME);if(!n){nameReturn='lineup';showNameScreen('');}else prepareLineup();}
+function ensureNameThenLineup(){prepareLineup();}
 function beginFromHome(){storyReturn='flow';if(storageGet(LS_SEEN)==='true')ensureNameThenLineup();else showStory(0);}
 function showNameScreen(prefill){$('nameInput').value=prefill!==undefined?prefill:storageGet(LS_NAME);$('nameError').textContent='';showScreen('nameScreen');setTimeout(()=>$('nameInput').focus(),80);}
-function saveName(){const n=sanitizeName($('nameInput').value);if(!n){$('nameError').textContent='名前を入力してください。';return;}storageSet(LS_NAME,n);refreshHome();prepareLineup();}
+function saveName(){const n=sanitizeName($('nameInput').value);if(n)storageSet(LS_NAME,n);else storageRemove(LS_NAME);refreshHome();showScreen('homeScreen');}
 
 const storyTexts=[`僕らはやってきた！\n憧れの！甲子園！\n\n11人しかいない弱小の野球部が\nここまで来れたのは、全部エースのおかげ。\n\nその活躍ぶりからメジャーでも通用すると\n世間からの期待を浴びる話題のエース\n\n広瀬二郎\n\nプロ球団、メジャーの監督\n多くのファン達が見守る中、決勝が始まる`,
 `流れが変わったのは5回裏\nここまであまりキレがなかった二郎が\n肩の不調を主張し\n監督は二郎の将来を案じて降板させる\n\n控えのピッチャーは1人\n二郎ほどではないがなんとか9回まで相手を押さえ込む大活躍\nしかし、さすが決勝\n相手も粘りを見せ投球数も重なり\n肘の痛みを訴え泣きながら降板していく\n\n当然だ\nうちのチームには\n\nもう、他にピッチャーはいないのだ`,
@@ -1071,15 +1073,15 @@ function resultShareText(){if(!lastResult)return gameShareText();const r=lastRes
 async function shareText(text,statusEl){try{if(navigator.share){await navigator.share({text});}else if(navigator.clipboard){await navigator.clipboard.writeText(text);if(statusEl)statusEl.textContent='シェア文をコピーしました。';}else{throw new Error('share unavailable');}}catch(e){if(statusEl)statusEl.textContent='シェアできませんでした。';}}
 
 function rawScoreFromRow(row){return row.score??row.best_score??row.result_best_score??row.first_score??row.result_first_score??row.value??row.p_score??null;}
-function displayNameFromRow(row){return row.display_name??row.result_display_name??row.player_name??row.name??row.normalized_name??'名無し';}
+function displayNameFromRow(row){return row.display_name??row.result_display_name??row.player_name??row.name??row.normalized_name??'';}
 function rankFromRow(row,i){return row.rank??row.ranking??row.rank_no??row.rn??(i+1);}
 function setResultRankingMessage(msg){if(!dom.resultRankingList)return;dom.resultRankingList.innerHTML=`<div class="result-rank-note">${msg}</div>`;}
 function renderResultRanking(rows){
   if(!dom.resultRankingList)return;
-  const list=Array.isArray(rows)?rows.slice(0,5):[];
+  const list=Array.isArray(rows)?rows.map((row,index)=>({row,index})).filter(({row})=>row&&typeof displayNameFromRow(row)==='string'&&displayNameFromRow(row).trim()).slice(0,5):[];
   if(!list.length){setResultRankingMessage('まだランキングがありません。');return;}
-  dom.resultRankingList.innerHTML=list.map((row,i)=>{
-    const rank=rankFromRow(row,i);
+  dom.resultRankingList.innerHTML=list.map(({row,index})=>{
+    const rank=rankFromRow(row,index);
     const name=String(displayNameFromRow(row)).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
     const raw=rawScoreFromRow(row);
     const score=raw===null||raw===undefined?'—':`${Number(raw).toLocaleString()}点`;
@@ -1103,10 +1105,10 @@ async function loadResultRanking(){
   setResultRankingMessage('ランキングを読み込めませんでした。詳細ランキングで確認してください。');
 }
 function resultLabel(r){return r==='win'?'勝利':r==='extra'?'延長突入':r==='loss'?'逆転サヨナラ負け':'リタイア';}
-function endGame(result){state.mode='over';spinning=false;stopNico();setButtons('none');const score=computeScore(result);const snapshot={result,score,pitchCount:state.pitchCount,runs:result==='loss'?Math.min(state.runs,2):state.runs,hits:state.hits,walks:state.walks,strikeouts:state.strikeouts,doublePlays:state.doublePlays,balks:state.balks,runners:runnerStr()};lastResult=snapshot;const old=storageGet(LS_BEST);let bestUpdated=false;if(score!==null){if(old===''||Number(score)>Number(old)){storageSet(LS_BEST,score);bestUpdated=true;}}renderResult(snapshot,bestUpdated);showScreen('resultScreen');if(score!==null)submitScoreOnce(snapshot,bestUpdated);else loadResultRanking();}
-function renderResult(r,bestUpdated){const title=dom.resultTitle;title.textContent=resultLabel(r.result);title.className='result-title '+r.result;const rscr=$('resultScreen');if(rscr){rscr.classList.remove('win','extra','loss','retire');rscr.classList.add(r.result);}dom.resultScore.classList.remove('pop');void dom.resultScore.offsetWidth;dom.resultScore.classList.add('pop');dom.resultScore.textContent=r.score===null?'記録なし':formatScore(r.score);dom.rankingStatus.textContent=r.result==='retire'?'リタイアはランキング対象外です。':(bestUpdated?'ベストスコア更新。ランキング送信中です。':'ランキング送信中です。');dom.resultStats.innerHTML=[['投球数',`${r.pitchCount}球`],['失点',`${r.runs}`],['被安打',`${r.hits}`],['四球',`${r.walks}`],['三振',`${r.strikeouts}`],['ゲッツー',`${r.doublePlays}`],['ボーク',`${r.balks}`],['最終ランナー',r.runners]].map(([k,v])=>`<div class="stat"><span>${k}</span><b>${v}</b></div>`).join('');const msgs={win:'遠くで広瀬二郎が取材陣に囲まれている。',extra:'監督の一言：「はぁぁぁぁ…(クソデカため息😮‍💨)」',loss:'監督の一言：「全員の夢が終わった、全部お前のせいや」',retire:'リタイアは記録に残らない。完投すればランキングに残る。'};dom.resultMsg.textContent=msgs[r.result];setResultRankingMessage('ランキングを読み込み中...');refreshHome();}
+function endGame(result){state.mode='over';spinning=false;stopNico();setButtons('none');const score=computeScore(result);const snapshot=Object.freeze({result,score,displayName:state.displayName,pitchCount:state.pitchCount,runs:result==='loss'?Math.min(state.runs,2):state.runs,hits:state.hits,walks:state.walks,strikeouts:state.strikeouts,doublePlays:state.doublePlays,balks:state.balks,runners:runnerStr()});lastResult=snapshot;const old=storageGet(LS_BEST);let bestUpdated=false;if(score!==null){if(old===''||Number(score)>Number(old)){storageSet(LS_BEST,score);bestUpdated=true;}}renderResult(snapshot,bestUpdated);showScreen('resultScreen');if(score!==null&&snapshot.displayName)submitScoreOnce(snapshot,bestUpdated);else loadResultRanking();}
+function renderResult(r,bestUpdated){const title=dom.resultTitle;title.textContent=resultLabel(r.result);title.className='result-title '+r.result;const rscr=$('resultScreen');if(rscr){rscr.classList.remove('win','extra','loss','retire');rscr.classList.add(r.result);}dom.resultScore.classList.remove('pop');void dom.resultScore.offsetWidth;dom.resultScore.classList.add('pop');dom.resultScore.textContent=r.score===null?'記録なし':formatScore(r.score);dom.rankingStatus.textContent=r.result==='retire'?'リタイアはランキング対象外です。':(!r.displayName?(bestUpdated?'ベストスコア更新。':'')+'名前なしのためランキングには登録しません。':(bestUpdated?'ベストスコア更新。ランキング送信中です。':'ランキング送信中です。'));dom.resultStats.innerHTML=[['投球数',`${r.pitchCount}球`],['失点',`${r.runs}`],['被安打',`${r.hits}`],['四球',`${r.walks}`],['三振',`${r.strikeouts}`],['ゲッツー',`${r.doublePlays}`],['ボーク',`${r.balks}`],['最終ランナー',r.runners]].map(([k,v])=>`<div class="stat"><span>${k}</span><b>${v}</b></div>`).join('');const msgs={win:'遠くで広瀬二郎が取材陣に囲まれている。',extra:'監督の一言：「はぁぁぁぁ…(クソデカため息😮‍💨)」',loss:'監督の一言：「全員の夢が終わった、全部お前のせいや」',retire:'リタイアは記録に残らない。完投すればランキングに残る。'};dom.resultMsg.textContent=msgs[r.result];setResultRankingMessage('ランキングを読み込み中...');refreshHome();}
 let submitting=false;
-async function submitScoreOnce(r,bestUpdated){if(submitting)return;submitting=true;try{const name=storageGet(LS_NAME)||'名無し';const res=await fetch(`${SUPABASE_URL}/rest/v1/rpc/submit_score`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`},body:JSON.stringify({p_display_name:name,p_game_slug:GAME_SLUG,p_score:r.score,p_client_version:CLIENT_VERSION})});if(!res.ok)throw new Error(`HTTP ${res.status}`);dom.rankingStatus.textContent=(bestUpdated?'ベストスコア更新！ ':'')+'ランキング登録しました。詳細ランキングで順位を確認できます。';}catch(e){dom.rankingStatus.textContent='ランキング送信に失敗しました。この端末のベストスコアには保存されています。通信状況を確認してください。';}finally{submitting=false;loadResultRanking();}}
+async function submitScoreOnce(r,bestUpdated){if(submitting||!r.displayName||r.score===null)return;submitting=true;try{const name=r.displayName;const res=await fetch(`${SUPABASE_URL}/rest/v1/rpc/submit_score`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`},body:JSON.stringify({p_display_name:name,p_game_slug:GAME_SLUG,p_score:r.score,p_client_version:CLIENT_VERSION})});if(!res.ok)throw new Error(`HTTP ${res.status}`);dom.rankingStatus.textContent=(bestUpdated?'ベストスコア更新！ ':'')+'ランキング登録しました。詳細ランキングで順位を確認できます。';}catch(e){dom.rankingStatus.textContent='ランキング送信に失敗しました。この端末のベストスコアには保存されています。通信状況を確認してください。';}finally{submitting=false;loadResultRanking();}}
 
 const NICO_COMMENTS=['真ん中だけはやめろ','緑を狙え','赤は見るな','ゲッツーください','俺、今日スコア付けてただけなんだが','勝ったら俺のおかげだろ','外低めだけ見ろ','真ん中は命取り','ボールは怖いぞ','四球だけはやめろ','頼むから転がってくれ','三振くれ','俺を見ないでくれ','監督こわい','二郎の視線が重い','今だけ肩強くなれ','指先しっかりしろ','手が震えるな','深呼吸しろ','まず1球だ','次の1球だけ考えろ','1点が重すぎる','ランナー出すな','一塁は地獄の始まり','ここでボークは終わる','ボークだけはダメだ','打たれても前向け','いや打たれるな','苦手球種を信じろ','苦手コースを信じろ','データは俺を裏切るな','ここで分析力を見せろ','マネージャー力で勝て','元ピッチャーをなめるな','ベンチの空気が重い','泣いてる場合じゃない','俺も泣きたい','スタンド静かにしてくれ','幻聴までうるさい','二郎を勝たせろ','俺だって勝ちたい','逃げるな俺','腹くくれ','ここで決めろ','甲子園で何してんだ俺','なんで決勝で初登板なんだ','プレッシャーが服着てる','視線が全部痛い','相手4番こっち見るな','俊足はやめてくれ','ゴロ打ってくれ','フライでもいいぞ','いや浅いフライな','ラッキーください','守備頼むぞ','みんな起きてるよな','勝てば伝説だ','負けたら戦犯だ','ここ抑えたら主人公','勝ったら俺のおかげだろ'];
 let nicoActive=false,nicoNextAt=0;const nicoItems=[];
@@ -1139,8 +1141,9 @@ $('startBtn').addEventListener('click',beginFromHome);
 $('storyAgainBtn').addEventListener('click',()=>{storyReturn='home';showStory(0);});
 $('storySkipBtn').addEventListener('click',finishStory);
 dom.storyNextBtn.addEventListener('click',()=>{if(storyIndex<2)showStory(storyIndex+1);else finishStory();});
+$('editNameBtn').addEventListener('click',()=>showNameScreen());
 $('saveNameBtn').addEventListener('click',saveName);
-$('nameInput').addEventListener('keydown',e=>{if(e.key==='Enter')saveName();});
+$('nameInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing&&e.keyCode!==229)saveName();});
 $('nameBackBtn').addEventListener('click',()=>showScreen('homeScreen'));
 $('matchStartBtn').addEventListener('click',startMatch);
 $('lineupBackBtn').addEventListener('click',()=>showScreen('homeScreen'));
@@ -1148,7 +1151,7 @@ $('rulesBtn').addEventListener('click',()=>openOverlay(dom.rulesOverlay));
 $('rulesCloseBtn').addEventListener('click',()=>closeOverlay(dom.rulesOverlay));
 $('shareGameBtn').addEventListener('click',()=>shareText(gameShareText(),dom.homeStatus));
 $('shareResultBtn').addEventListener('click',()=>shareText(resultShareText(),dom.rankingStatus));
-$('replayBtn').addEventListener('click',()=>{if(!storageGet(LS_NAME)){nameReturn='lineup';showNameScreen('');}else prepareLineup();});
+$('replayBtn').addEventListener('click',ensureNameThenLineup);
 $('resultHomeBtn').addEventListener('click',()=>showScreen('homeScreen'));
 dom.wheelWrap.addEventListener('pointerdown',e=>{e.preventDefault();onStop();});
 dom.continueBtn.addEventListener('click',onContinue);
