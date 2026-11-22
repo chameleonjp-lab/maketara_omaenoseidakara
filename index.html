@@ -673,7 +673,9 @@ input,textarea{-webkit-user-select:text;user-select:text;-webkit-touch-callout:d
       </div>
       <div id="resultRankingBox" class="result-ranking-box">
         <div class="result-ranking-head">ベストランキング</div>
-        <div id="resultRankingList" class="result-ranking-list">ランキングを読み込み中...</div>
+        <p id="resultRankingStatus" class="result-rank-note" role="status" aria-atomic="true">ランキングを読み込み中...</p>
+        <div id="resultRankingList" class="result-ranking-list" aria-busy="false"></div>
+        <button id="retryResultRanking" class="btn ghost" type="button" hidden>再試行</button>
       </div>
     </div>
   </div>
@@ -709,6 +711,7 @@ const localizations=Object.freeze({"en":{"1点リードで、あなたは突然�
 const sourceKeys=Object.freeze(Object.keys(localizations.en));
 const japaneseCopy=Object.freeze({"完投すると、勝っても負けてもランキングに残ります。":"名前を入力して完投すると、勝っても負けてもランキングに残ります。","小さく速いルーレットを止めて、球種・球速・コースを決めます。無失点で3アウトなら勝利。1失点なら延長突入。2失点で逆転サヨナラ負け。負けてもマイナススコアでランキングに残ります。":"小さく速いルーレットを止めて、球種・球速・コースを決めます。無失点で3アウトなら勝利。1失点なら延長突入。2失点で逆転サヨナラ負け。名前を入力していれば、負けてもマイナススコアでランキングに残ります。","リタイアは記録に残らない。完投すればランキングに残る。":"リタイアは記録に残りません。名前を入力して完投するとランキングに残ります。","相手打者の得意・苦手を見て、球種・球速・コースのルーレットを止めよう。\n\n緑は打者の苦手ゾーン。\n赤と真ん中は危険。\n青のボールは空振りも狙えるが、四球のリスクがあります。\n\n無失点で3アウトなら勝利。\n1失点で3アウトなら延長突入。\n2失点した時点で逆転サヨナラ負け。\n\nどのルーレットも15回転放置するとボーク。\nランナーがいれば進塁、ランナーなしならボール扱いです。\n\n勝利・延長・敗戦はランキングに残ります。\nリタイアはランキング対象外です。":"相手打者の得意・苦手を見て、球種・球速・コースのルーレットを止めよう。\n\n緑は打者の苦手ゾーン。\n赤と真ん中は危険。\n青のボールは空振りも狙えるが、四球のリスクがあります。\n\n無失点で3アウトなら勝利。\n1失点で3アウトなら延長突入。\n2失点した時点で逆転サヨナラ負け。\n\nどのルーレットも15回転放置するとボーク。\nランナーがいれば進塁、ランナーなしならボール扱いです。\n\n名前を入力していれば、勝利・延長・敗戦の記録がランキングに残ります。\nリタイアはランキング対象外です。"});
 const xShareLabels=Object.freeze({"en":"Share on X","es":"Compartir en X","pt-BR":"Compartilhar no X","zh-Hans":"分享到 X","fr":"Partager sur X","de":"Auf X teilen","ko":"X에 공유","ru":"Поделиться в X","it":"Condividi su X","zh-Hant":"分享到 X","id":"Bagikan di X","tr":"X’te paylaş","vi":"Chia sẻ trên X","th":"แชร์บน X"});
+const rankingRetryLabels=Object.freeze({ja:"再試行",en:"Retry",es:"Reintentar","pt-BR":"Tentar novamente","zh-Hans":"重试",fr:"Réessayer",de:"Erneut versuchen",ko:"다시 시도",ru:"Повторить",it:"Riprova","zh-Hant":"重試",id:"Coba lagi",tr:"Yeniden dene",vi:"Thử lại",th:"ลองอีกครั้ง"});
 const rankingLinkLabels=Object.freeze({"ja":"ランキング","en":"Ranking","es":"Clasificación","pt-BR":"Classificação","zh-Hans":"排行榜","fr":"Classement","de":"Rangliste","ko":"순위표","ru":"Таблица лидеров","it":"Classifica","zh-Hant":"排行榜","id":"Papan peringkat","tr":"Sıralama","vi":"Bảng xếp hạng","th":"อันดับ"});
 const staticKeys=new Set(["ランキング","Xでシェア","1点リードで、あなたは突然マウンドへ。","1番","B","KOSHIEN FINAL","S","SCOUTING REPORT","build v18","「負けたらお前のせいな」","お前のせいだから","なし","アウト","カウント","ゲームをシェア","ゲーム終了","ゲーム開始","スキップ","ベスト","ベストランキング","ホームに戻る","ランキングを読み込み中...","ランナー","リタイア","リタイアする","リタイアはランキング対象外です。","ルール説明","世界観をもう一度見る","他のゲームで遊ぶ","保存してホームへ","円盤をタップして止める","再ゲーム","右打ち・バランス型","名前と記録をランキングに載せるときだけ入力してください。空欄にして保存すると、名前なしで遊べます。","名前を入力","名前を入力すると、名前と記録がランキングに公開されます。空欄でも遊べます。","名前を設定・変更（任意）","名前設定（任意）","名前（任意）","夏の甲子園 決勝 ・ 9回裏 ・ 1点リード","夏の甲子園決勝、9回裏。","失点","完投すると、勝っても負けてもランキングに残ります。","小さく速いルーレットを止めて、球種・球速・コースを決めます。無失点で3アウトなら勝利。1失点なら延長突入。2失点で逆転サヨナラ負け。負けてもマイナススコアでランキングに残ります。","得意 —","得意を避けて、狭い苦手ゾーンを狙う。","打線","未登録","本当にリタイアしますか？","次の投球へ","次へ","球数","球種を止める","登録名","相手打線","相手打線 9人","相手打者の得意・苦手を見て、球種・球速・コースのルーレットを止めよう。\n\n緑は打者の苦手ゾーン。\n赤と真ん中は危険。\n青のボールは空振りも狙えるが、四球のリスクがあります。\n\n無失点で3アウトなら勝利。\n1失点で3アウトなら延長突入。\n2失点した時点で逆転サヨナラ負け。\n\nどのルーレットも15回転放置するとボーク。\nランナーがいれば進塁、ランナーなしならボール扱いです。\n\n勝利・延長・敗戦はランキングに残ります。\nリタイアはランキング対象外です。","結果","結果をシェア","続ける","緑は苦手ゾーン。赤と真ん中は危険。","苦手 —","試合開始","詳細ランキングへ","負けたら","負けたらお前のせいだから","閉じる","言語"]);
 const languageStorage='maketara_omae_no_sei_dakara_language_v1';
@@ -720,6 +723,7 @@ const localesComplete=localeIds.slice(1).every(id=>sourceKeys.every(key=>{
  return typeof entry==='string'&&entry.trim()&&localeTokens(entry)===localeTokens(key);
 }));
 function t(source,...args){
+ if(source==="再試行")return rankingRetryLabels[activeLanguage]??source;
  if(source==="ランキング")return rankingLinkLabels[activeLanguage]??source;
  if(source==="Xでシェア")return xShareLabels[activeLanguage]??source;
  const template=activeLanguage==='ja'?japaneseCopy[source]??source:localizations[activeLanguage]?.[source]??source;
@@ -766,6 +770,7 @@ function initLanguage(){
   document.title=t(GAME_TITLE);
   document.documentElement.lang=activeLanguage;
   picker.setAttribute('aria-label',t('言語'));
+  if(showingResultRanking)paintResultRanking();
   refreshHome();
  };
  localeIds.forEach((id,i)=>picker.add(new Option(localeOptions[i],id)));
@@ -806,6 +811,8 @@ function resetScreenScroll(id){
   nodes.forEach(el=>{try{ if(!el)return; if(el===window)el.scrollTo(0,0); else el.scrollTop=0; }catch(e){} });
 }
 function showScreen(id){
+  showingResultRanking=id==='resultScreen';
+  if(!showingResultRanking)++resultRankingRequest;
   ['homeScreen','storyScreen','nameScreen','lineupScreen','gameScreen','resultScreen'].forEach(s=>$(s).classList.toggle('hidden',s!==id));
   resetScreenScroll(id);
   if(id==='lineupScreen'||id==='resultScreen'){
@@ -1019,7 +1026,7 @@ function doBalk(){state.pitchCount++;state.balks++;let log='',paEnded=false;if(a
 function computeScore(result){if(result==='retire')return null;let pts=result==='win'?6000:result==='extra'?2000:-2000;pts+=220*state.strikeouts;pts+=500*state.doublePlays;if(result!=='loss'&&state.hits===0&&state.walks===0&&state.balks===0)pts+=600;if(result!=='loss'&&basesEmpty())pts+=300;pts+=120*state.weakTypeOuts;pts+=120*state.weakCourseOuts;pts+=60*state.weakSpeedOuts;pts+=80*state.chaseStrikes;pts-=35*state.pitchCount;pts-=350*state.walks;pts-=350*state.singles;pts-=650*state.doubles;pts-=1200*state.homers;pts-=1500*state.runs;pts-=500*state.balks;if(state.loadedEver)pts-=500;pts-=300*state.middleHits;pts-=150*state.goodTypeHits;pts-=150*state.goodCourseHits;pts=Math.round(pts);if(result==='win')return clamp(pts,5000,9999);if(result==='extra')return clamp(pts,0,4999);return clamp(pts,-9999,-1);}
 
 const REDUCED=window.matchMedia('(prefers-reduced-motion: reduce)').matches;const SPIN={type:1107,speed:1152,course:1197};const BALK_DEG=15*360;let dom={},cv,ctx,cx=0,cy=0,R=0,dpr=1,wheelSegs=[],rot=0,spinning=false,spinSpeed=0,spunDeg=0,pausedSpin=false,lastT=0;
-function initDom(){dom={homeName:$('homeName'),homeBest:$('homeBest'),homeStatus:$('homeStatus'),nameInput:$('nameInput'),nameError:$('nameError'),storyCanvas:$('storyCanvas'),storyText:$('storyText'),storyPage:$('storyPage'),storyNextBtn:$('storyNextBtn'),lineupConfirmList:$('lineupConfirmList'),outs:$('outs'),count:$('count'),pitches:$('pitches'),runs:$('runs'),runners:$('runners'),retireBtn:$('retireBtn'),lineupBtn:$('lineupBtn'),bNum:$('bNum'),bMeta:$('bMeta'),bGood:$('bGood'),bBad:$('bBad'),bTrait:$('bTrait'),ribbon:$('ribbon'),stageLine:$('stageLine'),wheelWrap:$('wheelWrap'),resultCall:$('resultCall'),continueBtn:$('continueBtn'),tapHint:$('tapHint'),playText:$('playText'),flash:$('flash'),countdownOverlay:$('countdownOverlay'),cdText:$('cdText'),cdSub:$('cdSub'),lineupOverlay:$('lineupOverlay'),lineupList:$('lineupList'),lineupClose:$('lineupClose'),retireOverlay:$('retireOverlay'),retireYes:$('retireYes'),retireNo:$('retireNo'),rulesOverlay:$('rulesOverlay'),rankingStatus:$('rankingStatus'),resultTitle:$('resultTitle'),resultScore:$('resultScore'),resultStats:$('resultStats'),resultMsg:$('resultMsg'),resultRankingList:$('resultRankingList')};cv=$('wheel');ctx=cv.getContext('2d');}
+function initDom(){dom={homeName:$('homeName'),homeBest:$('homeBest'),homeStatus:$('homeStatus'),nameInput:$('nameInput'),nameError:$('nameError'),storyCanvas:$('storyCanvas'),storyText:$('storyText'),storyPage:$('storyPage'),storyNextBtn:$('storyNextBtn'),lineupConfirmList:$('lineupConfirmList'),outs:$('outs'),count:$('count'),pitches:$('pitches'),runs:$('runs'),runners:$('runners'),retireBtn:$('retireBtn'),lineupBtn:$('lineupBtn'),bNum:$('bNum'),bMeta:$('bMeta'),bGood:$('bGood'),bBad:$('bBad'),bTrait:$('bTrait'),ribbon:$('ribbon'),stageLine:$('stageLine'),wheelWrap:$('wheelWrap'),resultCall:$('resultCall'),continueBtn:$('continueBtn'),tapHint:$('tapHint'),playText:$('playText'),flash:$('flash'),countdownOverlay:$('countdownOverlay'),cdText:$('cdText'),cdSub:$('cdSub'),lineupOverlay:$('lineupOverlay'),lineupList:$('lineupList'),lineupClose:$('lineupClose'),retireOverlay:$('retireOverlay'),retireYes:$('retireYes'),retireNo:$('retireNo'),rulesOverlay:$('rulesOverlay'),rankingStatus:$('rankingStatus'),resultTitle:$('resultTitle'),resultScore:$('resultScore'),resultStats:$('resultStats'),resultMsg:$('resultMsg'),resultRankingList:$('resultRankingList'),resultRankingStatus:$('resultRankingStatus'),retryResultRanking:$('retryResultRanking')};cv=$('wheel');ctx=cv.getContext('2d');}
 function sizeCanvas(){if(!cv)return;const w=cv.clientWidth;if(!w)return;dpr=window.devicePixelRatio||1;cv.width=Math.round(w*dpr);cv.height=Math.round(w*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);cx=w/2;cy=w/2;R=w/2-3;buildWheelLayer();drawWheel();}
 function computeAngles(segs){let acc=0;return segs.map(s=>{const span=(s.size/100)*360;const o=Object.assign({},s,{start:acc,span});acc+=span;return o;});}
 function splitLabel(s){if(/^\d+$/.test(s))return[s];if(s.length===2)return[s[0],s[1]];if(s.length>=4){const h=Math.ceil(s.length/2);return[s.slice(0,h),s.slice(h)];}return[s];}
@@ -1198,43 +1205,56 @@ async function shareText(text,statusEl,manualEl){
  }
 }
 
-function rawScoreFromRow(row){return row.score??row.best_score??row.result_best_score??row.first_score??row.result_first_score??row.value??row.p_score??null;}
-function displayNameFromRow(row){return row.display_name??row.result_display_name??row.player_name??row.name??row.normalized_name??'';}
-function rankFromRow(row,i){return row.rank??row.ranking??row.rank_no??row.rn??(i+1);}
-function setResultRankingMessage(msg){if(!dom.resultRankingList)return;dom.resultRankingList.innerHTML=`<div class="result-rank-note">${msg}</div>`;}
-function renderResultRanking(rows){
-  if(!dom.resultRankingList)return;
-  const list=Array.isArray(rows)?rows.map((row,index)=>({row,index})).filter(({row})=>row&&typeof displayNameFromRow(row)==='string'&&displayNameFromRow(row).trim()).slice(0,5):[];
-  if(!list.length){setResultRankingMessage(t("まだランキングがありません。"));return;}
-  dom.resultRankingList.innerHTML=list.map(({row,index})=>{
-    const rank=rankFromRow(row,index);
-    const name=String(displayNameFromRow(row)).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
-    const raw=rawScoreFromRow(row);
-    const score=raw===null||raw===undefined?'—':t("{arg0}点",Number(raw).toLocaleString(activeLanguage));
-    return `<div class="result-rank-row"><div class="result-rank-rank">${escapeText(t('{arg0}位',rank))}</div><div class="result-rank-name">${name}</div><div class="result-rank-score">${score}</div></div>`;
-  }).join('');
+const RESULT_RANKING_LIMIT=30;
+let resultRankingRequest=0, showingResultRanking=false, resultRankingView={phase:'loading',rows:[]};
+function currentResultRanking(result){return showingResultRanking&&result!==null&&lastResult===result;}
+function setResultRankingView(phase,rows=[]){
+  resultRankingView={phase,rows};
+  paintResultRanking();
 }
-async function loadResultRanking(){
+function paintResultRanking(){
   if(!dom.resultRankingList)return;
-  setResultRankingMessage(t("ランキングを読み込み中..."));
-  const bodies=[{p_game_slug:GAME_SLUG,p_limit:5},{p_game_slug:GAME_SLUG},{game_slug:GAME_SLUG,limit_count:5}];
-  let lastErr=null;
-  for(const body of bodies){
-    try{
-      const res=await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_best_score_ranking`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`},body:JSON.stringify(body)});
-      if(!res.ok){lastErr=new Error(`HTTP ${res.status}`);continue;}
-      const data=await res.json();
-      renderResultRanking(data);
-      return;
-    }catch(e){lastErr=e;}
+  const {phase,rows}=resultRankingView;
+  const messages={
+    loading:"ランキングを読み込み中...",
+    empty:"まだランキングがありません。",
+    error:"ランキングを読み込めませんでした。詳細ランキングで確認してください。"
+  };
+  dom.resultRankingStatus.textContent=phase==='ready'?'':t(messages[phase]);
+  dom.retryResultRanking.textContent=t("再試行");
+  dom.retryResultRanking.hidden=phase!=='error';
+  dom.resultRankingList.setAttribute('aria-busy',String(phase==='loading'));
+  dom.resultRankingList.innerHTML=phase==='ready'?rows.map(row=>{
+    const hasRank=(typeof row.rank_no==='number'||typeof row.rank_no==='string')&&Number.isSafeInteger(Number(row.rank_no))&&Number(row.rank_no)>0;
+    const rank=hasRank?t('{arg0}位',row.rank_no):'—';
+    const raw=row.best_score;
+    const hasScore=(typeof raw==='number'||(typeof raw==='string'&&raw.trim()!==''))&&Number.isFinite(Number(raw));
+    const score=hasScore?t("{arg0}点",Number(raw).toLocaleString(activeLanguage)):'—';
+    return `<div class="result-rank-row"><div class="result-rank-rank">${escapeText(rank)}</div><div class="result-rank-name">${escapeText(row.display_name)}</div><div class="result-rank-score">${escapeText(score)}</div></div>`;
+  }).join(''):'';
+}
+async function loadResultRanking(result=lastResult){
+  if(!dom.resultRankingList||!currentResultRanking(result))return;
+  const request=++resultRankingRequest;
+  const current=()=>request===resultRankingRequest&&currentResultRanking(result);
+  setResultRankingView('loading');
+  try{
+    const res=await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_best_score_ranking`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`},body:JSON.stringify({p_game_slug:GAME_SLUG,p_limit:RESULT_RANKING_LIMIT})});
+    if(!res.ok)throw new Error(`HTTP ${res.status}`);
+    const data=await res.json();
+    if(!current())return;
+    if(!Array.isArray(data))throw new Error('Invalid leaderboard response');
+    const rows=data.slice(0,RESULT_RANKING_LIMIT).filter(row=>row&&typeof row.display_name==='string'&&row.display_name.trim());
+    setResultRankingView(rows.length?'ready':'empty',rows);
+  }catch(e){
+    if(current())setResultRankingView('error');
   }
-  setResultRankingMessage(t("ランキングを読み込めませんでした。詳細ランキングで確認してください。"));
 }
 function resultLabel(r){return r==='win'?t("勝利"):r==='extra'?t("延長突入"):r==='loss'?t("逆転サヨナラ負け"):t("リタイア");}
 function endGame(result){state.mode='over';spinning=false;stopNico();setButtons('none');const score=computeScore(result);const snapshot=Object.freeze({result,score,displayName:state.displayName,pitchCount:state.pitchCount,runs:result==='loss'?Math.min(state.runs,2):state.runs,hits:state.hits,walks:state.walks,strikeouts:state.strikeouts,doublePlays:state.doublePlays,balks:state.balks,runners:runnerStr()});lastResult=snapshot;const old=storageGet(LS_BEST);let bestUpdated=false;if(score!==null){if(old===''||Number(score)>Number(old)){storageSet(LS_BEST,score);bestUpdated=true;}}renderResult(snapshot,bestUpdated);showScreen('resultScreen');if(score!==null&&snapshot.displayName)submitScoreOnce(snapshot,bestUpdated);else loadResultRanking();}
-function renderResult(r,bestUpdated){const title=dom.resultTitle;title.textContent=resultLabel(r.result);title.className='result-title '+r.result;const rscr=$('resultScreen');if(rscr){rscr.classList.remove('win','extra','loss','retire');rscr.classList.add(r.result);}dom.resultScore.classList.remove('pop');void dom.resultScore.offsetWidth;dom.resultScore.classList.add('pop');dom.resultScore.textContent=r.score===null?t("記録なし"):formatScore(r.score);dom.rankingStatus.textContent=r.result==='retire'?t("リタイアはランキング対象外です。"):(!r.displayName?(bestUpdated?t("ベストスコア更新。"):'')+t("名前なしのためランキングには登録しません。"):(bestUpdated?t("ベストスコア更新。ランキング送信中です。"):t("ランキング送信中です。")));dom.resultStats.innerHTML=[[t("投球数"),t("{arg0}球",r.pitchCount)],[t("失点"),`${r.runs}`],[t("被安打"),`${r.hits}`],[t("四球"),`${r.walks}`],[t("三振"),`${r.strikeouts}`],[t("ゲッツー"),`${r.doublePlays}`],[t("ボーク"),`${r.balks}`],[t("最終ランナー"),r.runners]].map(([k,v])=>`<div class="stat"><span>${k}</span><b>${v}</b></div>`).join('');const msgs={win:t("遠くで広瀬二郎が取材陣に囲まれている。"),extra:t("監督の一言：「はぁぁぁぁ…(クソデカため息😮‍💨)」"),loss:t("監督の一言：「全員の夢が終わった、全部お前のせいや」"),retire:t("リタイアは記録に残らない。完投すればランキングに残る。")};dom.resultMsg.textContent=msgs[r.result];setResultRankingMessage(t("ランキングを読み込み中..."));refreshHome();}
+function renderResult(r,bestUpdated){const title=dom.resultTitle;title.textContent=resultLabel(r.result);title.className='result-title '+r.result;const rscr=$('resultScreen');if(rscr){rscr.classList.remove('win','extra','loss','retire');rscr.classList.add(r.result);}dom.resultScore.classList.remove('pop');void dom.resultScore.offsetWidth;dom.resultScore.classList.add('pop');dom.resultScore.textContent=r.score===null?t("記録なし"):formatScore(r.score);dom.rankingStatus.textContent=r.result==='retire'?t("リタイアはランキング対象外です。"):(!r.displayName?(bestUpdated?t("ベストスコア更新。"):'')+t("名前なしのためランキングには登録しません。"):(bestUpdated?t("ベストスコア更新。ランキング送信中です。"):t("ランキング送信中です。")));dom.resultStats.innerHTML=[[t("投球数"),t("{arg0}球",r.pitchCount)],[t("失点"),`${r.runs}`],[t("被安打"),`${r.hits}`],[t("四球"),`${r.walks}`],[t("三振"),`${r.strikeouts}`],[t("ゲッツー"),`${r.doublePlays}`],[t("ボーク"),`${r.balks}`],[t("最終ランナー"),r.runners]].map(([k,v])=>`<div class="stat"><span>${k}</span><b>${v}</b></div>`).join('');const msgs={win:t("遠くで広瀬二郎が取材陣に囲まれている。"),extra:t("監督の一言：「はぁぁぁぁ…(クソデカため息😮‍💨)」"),loss:t("監督の一言：「全員の夢が終わった、全部お前のせいや」"),retire:t("リタイアは記録に残らない。完投すればランキングに残る。")};dom.resultMsg.textContent=msgs[r.result];setResultRankingView('loading');refreshHome();}
 let submitting=false;
-async function submitScoreOnce(r,bestUpdated){if(submitting||!r.displayName||r.score===null)return;submitting=true;try{const name=r.displayName;const res=await fetch(`${SUPABASE_URL}/rest/v1/rpc/submit_score`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`},body:JSON.stringify({p_display_name:name,p_game_slug:GAME_SLUG,p_score:r.score,p_client_version:CLIENT_VERSION})});if(!res.ok)throw new Error(`HTTP ${res.status}`);dom.rankingStatus.textContent=(bestUpdated?t("ベストスコア更新！ "):'')+t("ランキング登録しました。詳細ランキングで順位を確認できます。");}catch(e){dom.rankingStatus.textContent=t("ランキング送信に失敗しました。この端末のベストスコアには保存されています。通信状況を確認してください。");}finally{submitting=false;loadResultRanking();}}
+async function submitScoreOnce(r,bestUpdated){if(!r.displayName||r.score===null)return;if(submitting){void loadResultRanking(r);return;}submitting=true;try{const name=r.displayName;const res=await fetch(`${SUPABASE_URL}/rest/v1/rpc/submit_score`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`},body:JSON.stringify({p_display_name:name,p_game_slug:GAME_SLUG,p_score:r.score,p_client_version:CLIENT_VERSION})});if(!res.ok)throw new Error(`HTTP ${res.status}`);if(currentResultRanking(r))dom.rankingStatus.textContent=(bestUpdated?t("ベストスコア更新！ "):'')+t("ランキング登録しました。詳細ランキングで順位を確認できます。");}catch(e){if(currentResultRanking(r))dom.rankingStatus.textContent=t("ランキング送信に失敗しました。この端末のベストスコアには保存されています。通信状況を確認してください。");}finally{submitting=false;if(currentResultRanking(r))void loadResultRanking(r);}}
 
 const NICO_COMMENTS=['真ん中だけはやめろ','緑を狙え','赤は見るな','ゲッツーください','俺、今日スコア付けてただけなんだが','勝ったら俺のおかげだろ','外低めだけ見ろ','真ん中は命取り','ボールは怖いぞ','四球だけはやめろ','頼むから転がってくれ','三振くれ','俺を見ないでくれ','監督こわい','二郎の視線が重い','今だけ肩強くなれ','指先しっかりしろ','手が震えるな','深呼吸しろ','まず1球だ','次の1球だけ考えろ','1点が重すぎる','ランナー出すな','一塁は地獄の始まり','ここでボークは終わる','ボークだけはダメだ','打たれても前向け','いや打たれるな','苦手球種を信じろ','苦手コースを信じろ','データは俺を裏切るな','ここで分析力を見せろ','マネージャー力で勝て','元ピッチャーをなめるな','ベンチの空気が重い','泣いてる場合じゃない','俺も泣きたい','スタンド静かにしてくれ','幻聴までうるさい','二郎を勝たせろ','俺だって勝ちたい','逃げるな俺','腹くくれ','ここで決めろ','甲子園で何してんだ俺','なんで決勝で初登板なんだ','プレッシャーが服着てる','視線が全部痛い','相手4番こっち見るな','俊足はやめてくれ','ゴロ打ってくれ','フライでもいいぞ','いや浅いフライな','ラッキーください','守備頼むぞ','みんな起きてるよな','勝てば伝説だ','負けたら戦犯だ','ここ抑えたら主人公','勝ったら俺のおかげだろ'];
 let nicoActive=false,nicoNextAt=0;const nicoItems=[];
@@ -1286,6 +1306,7 @@ dom.retireNo.addEventListener('click',()=>{closeOverlay(dom.retireOverlay);if(pa
 dom.retireYes.addEventListener('click',()=>{closeOverlay(dom.retireOverlay);endGame('retire');});
 dom.lineupBtn.addEventListener('click',()=>{pausedSpin=spinning;spinning=false;renderLineupModal();openOverlay(dom.lineupOverlay);});
 dom.lineupClose.addEventListener('click',()=>{closeOverlay(dom.lineupOverlay);if(pausedSpin&&/^spin/.test(state.mode))spinning=true;pausedSpin=false;});
+$('retryResultRanking').addEventListener('click',()=>{void loadResultRanking();});
 window.addEventListener('resize',()=>{sizeCanvas();sizeGameBg();sizeStoryCanvas();});
 }
 
