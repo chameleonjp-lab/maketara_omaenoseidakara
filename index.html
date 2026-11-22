@@ -1159,7 +1159,14 @@ function drawGameBg(){const c=$('gameBg');if(!c||!gbCtx)return;const w=window.in
 function shakeGame(){if(REDUCED)return;const a=document.querySelector('.game-app');if(!a)return;a.classList.remove('shake');void a.offsetWidth;a.classList.add('shake');}
 function refreshHome(){const n=storageGet(LS_NAME);dom.homeName.textContent=n||t("未登録");const best=storageGet(LS_BEST);dom.homeBest.textContent=best===''?'—':formatScore(best);}
 function gameShareText(){return t("{arg0}\n夏の甲子園決勝、9回裏1点リード。\n理不尽に送り出された控え投手として、3アウトを取りにいくルーレット投球ゲーム！\n{arg1}",t(GAME_TITLE),GAME_URL);}
-function resultShareText(){if(!lastResult)return gameShareText();const r=lastResult;const lines=[t("{arg0} 結果",t(GAME_TITLE)),t("結果：{arg0}",resultLabel(r.result))];if(r.score===null)lines.push(t("最終スコア：リタイア"));else lines.push(t("最終スコア：{arg0}点",r.score.toLocaleString(activeLanguage)));lines.push(t("投球数：{arg0}球",r.pitchCount),t("失点：{arg0}",r.runs),t("被安打：{arg0}",r.hits),t("四球：{arg0}",r.walks),t("三振：{arg0}",r.strikeouts),t("ゲッツー：{arg0}",r.doublePlays),t("ボーク：{arg0}",r.balks),GAME_URL);return lines.join('\n');}
+function resultShareText(){
+ if(!lastResult)return gameShareText();
+ const r=lastResult;
+ const lines=[t("{arg0} 結果",t(GAME_TITLE)),t("結果：{arg0}",resultLabel(r.result))];
+ if(r.score!==null)lines.push(t("最終スコア：{arg0}点",r.score.toLocaleString(activeLanguage)));
+ lines.push(t("投球数：{arg0}球",r.pitchCount),t("失点：{arg0}",r.runs),t("被安打：{arg0}",r.hits),t("三振：{arg0}",r.strikeouts),GAME_URL);
+ return lines.join('\n');
+}
 async function shareText(text,statusEl,manualEl){
  statusEl.textContent='';
  manualEl.hidden=true;
