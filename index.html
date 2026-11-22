@@ -554,6 +554,7 @@ input,textarea{-webkit-user-select:text;user-select:text;-webkit-touch-callout:d
           <div id="homeShareStatus" class="status-line x-share-feedback" role="status"></div>
           <textarea id="homeShareManual" class="x-share-manual" aria-labelledby="shareGameBtn" hidden readonly></textarea>
         </div>
+        <a id="homeRankingLink" class="btn ghost" href="https://chameleonjp-lab.github.io/chameleonjp_lab/ranking.html?game=maketara_omae_no_sei_dakara" target="_blank" rel="noopener noreferrer">ランキング</a>
         <a id="labLinkHome" class="btn ghost" href="https://chameleonjp.codeberg.page/chameleonjp_lab/">他のゲームで遊ぶ</a>
       </div>
       <div class="ver-tag">build v18</div>
@@ -666,7 +667,7 @@ input,textarea{-webkit-user-select:text;user-select:text;-webkit-touch-callout:d
         <button id="shareResultBtn" class="btn secondary x-share-btn">Xでシェア</button>
         <div id="resultShareStatus" class="status-line x-share-feedback" role="status"></div>
         <textarea id="resultShareManual" class="x-share-manual" aria-labelledby="shareResultBtn" hidden readonly></textarea>
-        <a id="detailRankingBtn" class="btn ghost" href="https://chameleonjp.codeberg.page/chameleonjp_lab/ranking.html?game=maketara_omae_no_sei_dakara">詳細ランキングへ</a>
+        <a id="detailRankingBtn" class="btn ghost" href="https://chameleonjp-lab.github.io/chameleonjp_lab/ranking.html?game=maketara_omae_no_sei_dakara" target="_blank" rel="noopener noreferrer">ランキング</a>
         <button id="resultHomeBtn" class="btn ghost">ゲーム終了</button>
         <a class="btn ghost result-lab-link" href="https://chameleonjp.codeberg.page/chameleonjp_lab/">他のゲームで遊ぶ</a>
       </div>
@@ -708,7 +709,8 @@ const localizations=Object.freeze({"en":{"1点リードで、あなたは突然�
 const sourceKeys=Object.freeze(Object.keys(localizations.en));
 const japaneseCopy=Object.freeze({"完投すると、勝っても負けてもランキングに残ります。":"名前を入力して完投すると、勝っても負けてもランキングに残ります。","小さく速いルーレットを止めて、球種・球速・コースを決めます。無失点で3アウトなら勝利。1失点なら延長突入。2失点で逆転サヨナラ負け。負けてもマイナススコアでランキングに残ります。":"小さく速いルーレットを止めて、球種・球速・コースを決めます。無失点で3アウトなら勝利。1失点なら延長突入。2失点で逆転サヨナラ負け。名前を入力していれば、負けてもマイナススコアでランキングに残ります。","リタイアは記録に残らない。完投すればランキングに残る。":"リタイアは記録に残りません。名前を入力して完投するとランキングに残ります。","相手打者の得意・苦手を見て、球種・球速・コースのルーレットを止めよう。\n\n緑は打者の苦手ゾーン。\n赤と真ん中は危険。\n青のボールは空振りも狙えるが、四球のリスクがあります。\n\n無失点で3アウトなら勝利。\n1失点で3アウトなら延長突入。\n2失点した時点で逆転サヨナラ負け。\n\nどのルーレットも15回転放置するとボーク。\nランナーがいれば進塁、ランナーなしならボール扱いです。\n\n勝利・延長・敗戦はランキングに残ります。\nリタイアはランキング対象外です。":"相手打者の得意・苦手を見て、球種・球速・コースのルーレットを止めよう。\n\n緑は打者の苦手ゾーン。\n赤と真ん中は危険。\n青のボールは空振りも狙えるが、四球のリスクがあります。\n\n無失点で3アウトなら勝利。\n1失点で3アウトなら延長突入。\n2失点した時点で逆転サヨナラ負け。\n\nどのルーレットも15回転放置するとボーク。\nランナーがいれば進塁、ランナーなしならボール扱いです。\n\n名前を入力していれば、勝利・延長・敗戦の記録がランキングに残ります。\nリタイアはランキング対象外です。"});
 const xShareLabels=Object.freeze({"en":"Share on X","es":"Compartir en X","pt-BR":"Compartilhar no X","zh-Hans":"分享到 X","fr":"Partager sur X","de":"Auf X teilen","ko":"X에 공유","ru":"Поделиться в X","it":"Condividi su X","zh-Hant":"分享到 X","id":"Bagikan di X","tr":"X’te paylaş","vi":"Chia sẻ trên X","th":"แชร์บน X"});
-const staticKeys=new Set(["Xでシェア","1点リードで、あなたは突然マウンドへ。","1番","B","KOSHIEN FINAL","S","SCOUTING REPORT","build v18","「負けたらお前のせいな」","お前のせいだから","なし","アウト","カウント","ゲームをシェア","ゲーム終了","ゲーム開始","スキップ","ベスト","ベストランキング","ホームに戻る","ランキングを読み込み中...","ランナー","リタイア","リタイアする","リタイアはランキング対象外です。","ルール説明","世界観をもう一度見る","他のゲームで遊ぶ","保存してホームへ","円盤をタップして止める","再ゲーム","右打ち・バランス型","名前と記録をランキングに載せるときだけ入力してください。空欄にして保存すると、名前なしで遊べます。","名前を入力","名前を入力すると、名前と記録がランキングに公開されます。空欄でも遊べます。","名前を設定・変更（任意）","名前設定（任意）","名前（任意）","夏の甲子園 決勝 ・ 9回裏 ・ 1点リード","夏の甲子園決勝、9回裏。","失点","完投すると、勝っても負けてもランキングに残ります。","小さく速いルーレットを止めて、球種・球速・コースを決めます。無失点で3アウトなら勝利。1失点なら延長突入。2失点で逆転サヨナラ負け。負けてもマイナススコアでランキングに残ります。","得意 —","得意を避けて、狭い苦手ゾーンを狙う。","打線","未登録","本当にリタイアしますか？","次の投球へ","次へ","球数","球種を止める","登録名","相手打線","相手打線 9人","相手打者の得意・苦手を見て、球種・球速・コースのルーレットを止めよう。\n\n緑は打者の苦手ゾーン。\n赤と真ん中は危険。\n青のボールは空振りも狙えるが、四球のリスクがあります。\n\n無失点で3アウトなら勝利。\n1失点で3アウトなら延長突入。\n2失点した時点で逆転サヨナラ負け。\n\nどのルーレットも15回転放置するとボーク。\nランナーがいれば進塁、ランナーなしならボール扱いです。\n\n勝利・延長・敗戦はランキングに残ります。\nリタイアはランキング対象外です。","結果","結果をシェア","続ける","緑は苦手ゾーン。赤と真ん中は危険。","苦手 —","試合開始","詳細ランキングへ","負けたら","負けたらお前のせいだから","閉じる","言語"]);
+const rankingLinkLabels=Object.freeze({"ja":"ランキング","en":"Ranking","es":"Clasificación","pt-BR":"Classificação","zh-Hans":"排行榜","fr":"Classement","de":"Rangliste","ko":"순위표","ru":"Таблица лидеров","it":"Classifica","zh-Hant":"排行榜","id":"Papan peringkat","tr":"Sıralama","vi":"Bảng xếp hạng","th":"อันดับ"});
+const staticKeys=new Set(["ランキング","Xでシェア","1点リードで、あなたは突然マウンドへ。","1番","B","KOSHIEN FINAL","S","SCOUTING REPORT","build v18","「負けたらお前のせいな」","お前のせいだから","なし","アウト","カウント","ゲームをシェア","ゲーム終了","ゲーム開始","スキップ","ベスト","ベストランキング","ホームに戻る","ランキングを読み込み中...","ランナー","リタイア","リタイアする","リタイアはランキング対象外です。","ルール説明","世界観をもう一度見る","他のゲームで遊ぶ","保存してホームへ","円盤をタップして止める","再ゲーム","右打ち・バランス型","名前と記録をランキングに載せるときだけ入力してください。空欄にして保存すると、名前なしで遊べます。","名前を入力","名前を入力すると、名前と記録がランキングに公開されます。空欄でも遊べます。","名前を設定・変更（任意）","名前設定（任意）","名前（任意）","夏の甲子園 決勝 ・ 9回裏 ・ 1点リード","夏の甲子園決勝、9回裏。","失点","完投すると、勝っても負けてもランキングに残ります。","小さく速いルーレットを止めて、球種・球速・コースを決めます。無失点で3アウトなら勝利。1失点なら延長突入。2失点で逆転サヨナラ負け。負けてもマイナススコアでランキングに残ります。","得意 —","得意を避けて、狭い苦手ゾーンを狙う。","打線","未登録","本当にリタイアしますか？","次の投球へ","次へ","球数","球種を止める","登録名","相手打線","相手打線 9人","相手打者の得意・苦手を見て、球種・球速・コースのルーレットを止めよう。\n\n緑は打者の苦手ゾーン。\n赤と真ん中は危険。\n青のボールは空振りも狙えるが、四球のリスクがあります。\n\n無失点で3アウトなら勝利。\n1失点で3アウトなら延長突入。\n2失点した時点で逆転サヨナラ負け。\n\nどのルーレットも15回転放置するとボーク。\nランナーがいれば進塁、ランナーなしならボール扱いです。\n\n勝利・延長・敗戦はランキングに残ります。\nリタイアはランキング対象外です。","結果","結果をシェア","続ける","緑は苦手ゾーン。赤と真ん中は危険。","苦手 —","試合開始","詳細ランキングへ","負けたら","負けたらお前のせいだから","閉じる","言語"]);
 const languageStorage='maketara_omae_no_sei_dakara_language_v1';
 let activeLanguage='ja';
 let applyStaticLanguage=()=>{};
@@ -718,6 +720,7 @@ const localesComplete=localeIds.slice(1).every(id=>sourceKeys.every(key=>{
  return typeof entry==='string'&&entry.trim()&&localeTokens(entry)===localeTokens(key);
 }));
 function t(source,...args){
+ if(source==="ランキング")return rankingLinkLabels[activeLanguage]??source;
  if(source==="Xでシェア")return xShareLabels[activeLanguage]??source;
  const template=activeLanguage==='ja'?japaneseCopy[source]??source:localizations[activeLanguage]?.[source]??source;
  return String(template).replace(/\{arg(\d+)\}/g,(_,i)=>String(args[Number(i)]??''));
@@ -782,7 +785,6 @@ const GAME_SLUG='maketara_omae_no_sei_dakara';
 const GAME_TITLE='負けたらお前のせいだから';
 const GAME_URL='https://chameleonjp-lab.github.io/maketara_omaenoseidakara/';
 const LAB_URL='https://chameleonjp.codeberg.page/chameleonjp_lab/';
-const RANKING_URL='https://chameleonjp.codeberg.page/chameleonjp_lab/ranking.html?game=maketara_omae_no_sei_dakara';
 const CLIENT_VERSION='v1.0.0-full-20260610-v18';
 const SUPABASE_URL='https://mlpnjgezrnhdxsxolyzj.supabase.co';
 const SUPABASE_KEY='sb_publishable_drzcy0v97knU6FgjqSgBHw_0A9XPdFM';
